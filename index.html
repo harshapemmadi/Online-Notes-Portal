@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Online Notes Portal</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: url('https://images.unsplash.com/photo-1515879218367-8466d910aaa4') no-repeat center center fixed;
+      background-size: cover;
+      color: #fff;
+    }
+    .overlay {
+      background: rgba(0,0,0,0.6);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+    }
+    h1 {
+      font-size: 3em;
+      margin-bottom: 10px;
+    }
+    p {
+      font-size: 1.2em;
+      max-width: 600px;
+    }
+    /* Menu Button */
+    .menu {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+    }
+    .menu button {
+      background: #ff9800;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .menu-options {
+      display: none;
+      margin-top: 10px;
+      background: rgba(255,255,255,0.9);
+      padding: 10px;
+      border-radius: 5px;
+    }
+    .menu-options a {
+      display: block;
+      margin: 5px 0;
+      text-decoration: none;
+      color: #333;
+      font-weight: bold;
+    }
+    .menu-options a:hover {
+      color: #ff9800;
+    }
+  </style>
+</head>
+<body>
+  <div class="menu">
+    <button onclick="toggleMenu()">☰ Options</button>
+    <div class="menu-options" id="menuOptions">
+      <a href="login.html">Login</a>
+      <a href="register.html">Register</a>
+    </div>
+  </div>
+
+  <div class="overlay">
+    <h1>📒 Online Notes Portal</h1>
+    <p> Welcome To The Online Notes Portal</p>
+  </div>
+
+  <script>
+    function toggleMenu() {
+      const menu = document.getElementById('menuOptions');
+      menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+    }
+  </script>
+</body>
+</html>

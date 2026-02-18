@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Login Page</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: lightblue;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .container {
+      background: beige;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      width: 350px;
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    label {
+      display: block;
+      margin: 10px 0 5px;
+    }
+    input, select, button {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    button {
+      background: lightgrey;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background: green;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>User Login</h2>
+    
+    <!-- User Type Selection -->
+    <label for="loginType">Login as:</label>
+    <select id="loginType" onchange="toggleFields()">
+      <option value="">-- Select --</option>
+      <option value="student">Student</option>
+      <option value="faculty">Faculty</option>
+    </select>
+
+    <!-- Student Login Fields -->
+    <div id="studentFields" style="display:none;">
+      <label for="studentId">Email or Roll Number:</label>
+      <input type="text" id="studentId" placeholder="Enter email or roll number">
+    </div>
+
+    <!-- Faculty Login Fields -->
+    <div id="facultyFields" style="display:none;">
+      <label for="facultyId">Email or Faculty ID:</label>
+      <input type="text" id="facultyId" placeholder="Enter email or faculty ID">
+    </div>
+
+    <!-- Common Password -->
+    <label for="loginPassword">Password:</label>
+    <input type="password" id="loginPassword" placeholder="Enter password">
+
+    <button onclick="loginUser()">Login</button>
+  </div>
+
+<script>
+  // Show/hide fields based on selected login type
+  function toggleFields() {
+    const type = document.getElementById('loginType').value;
+    document.getElementById('studentFields').style.display = (type === 'student') ? 'block' : 'none';
+    document.getElementById('facultyFields').style.display = (type === 'faculty') ? 'block' : 'none';
+  }
+
+  // Helper to normalize values (trim spaces, lowercase strings, convert numbers to strings)
+  function normalize(value) {
+    if (typeof value === "string") {
+      return value.trim().toLowerCase();
+    }
+    return String(value);
+  }
+
+  function loginUser() {
+    const type = document.getElementById('loginType').value.trim().toLowerCase();
+    const password = document.getElementById('loginPassword').value.trim();
+    let identifier = "";
+
+    if (type === "student") {
+      identifier = document.getElementById('studentId').value.trim();
+    } else if (type === "faculty") {
+      identifier = document.getElementById('facultyId').value.trim();
+    }
+
+    if (!type || !identifier || !password) {
+      alert("Please fill all fields!");
+      return;
+    }
+
+    // Get registered users from localStorage
+    let users = JSON.parse(localStorage.getItem('users')) || [];
+
+    // Debugging: see what’s stored
+    console.log("Stored users:", users);
+
+    // Check if user exists
+    let validUser = users.find(user => {
+      if (normalize(user.userType) !== type) return false;
+
+      let idMatch =
+        normalize(user.email) === normalize(identifier) ||
+        (type === "student" && normalize(user.studentId) === normalize(identifier)) ||
+        (type === "faculty" && normalize(user.facultyId) === normalize(identifier));
+
+      let passwordMatch = normalize(user.password) === normalize(password);
+
+      // Debugging: log comparisons
+      console.log("Checking user:", user);
+      console.log("Identifier match:", idMatch, "Password match:", passwordMatch);
+
+      return idMatch && passwordMatch;
+    });
+
+    if (validUser) {
+      alert(`Login successful! Welcome ${validUser.name} (${validUser.userType})`);
+      window.location.href = "notes.html";
+      if (validUser.userType.toLowerCase() === "faculty") {
+      window.location.href = "faculty.html";
+    } else if (validUser.userType.toLowerCase() === "student") {
+      window.location.href = "student.html";
+    }
+    } else {
+      alert("Invalid credentials. Please try again.");
+    }
+    app.get('/api/notes', authenticate, (req, res) => {
+  const role = req.user.role;
+  if (role === 'student') {
+    // Return student-accessible notes
+  } else if (role === 'faculty') {
+    // Return faculty-uploaded notes
+  }
+});
+  }
+</script>
+</body>
+</html>

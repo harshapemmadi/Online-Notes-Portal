@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Student Notes Portal</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background: url('https://images.unsplash.com/photo-1524995997946-a1c2e315a42f') no-repeat center center fixed;
+      background-size: cover;
+      color: #fff;
+    }
+    .overlay {
+      background: rgba(0,0,0,0.6);
+      min-height: 100vh;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .subjects {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 15px;
+    }
+    .subject-box {
+      background: rgba(255,255,255,0.9);
+      color: #333;
+      padding: 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      width: 120px;
+      text-align: center;
+      transition: transform 0.2s;
+    }
+    .subject-box:hover {
+      transform: scale(1.05);
+      background: #2196f3;
+      color: #fff;
+    }
+    .notes-section {
+      margin-top: 30px;
+      background: rgba(255,255,255,0.95);
+      color: #333;
+      padding: 20px;
+      border-radius: 8px;
+      display: none;
+    }
+    .note-item {
+      margin: 10px 0;
+    }
+    .note-item a {
+      text-decoration: none;
+      color: #2196f3;
+      font-weight: bold;
+    }
+    .note-item span {
+      font-size: 0.9em;
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+  <div class="overlay">
+    <h1>🎓 Student Notes Portal</h1>
+    <p style="text-align:center;">Select a subject to view notes</p>
+
+    <!-- Subject Boxes -->
+    <div class="subjects">
+      <div class="subject-box" onclick="openSubject('Python')">Python</div>
+      <div class="subject-box" onclick="openSubject('Java')">Java</div>
+      <div class="subject-box" onclick="openSubject('C')">C</div>
+      <div class="subject-box" onclick="openSubject('HTML')">HTML</div>
+      <div class="subject-box" onclick="openSubject('CSS')">CSS</div>
+      <div class="subject-box" onclick="openSubject('JavaScript')">JavaScript</div>
+    </div>
+
+    <!-- Notes Section -->
+    <div class="notes-section" id="notesSection">
+      <h2 id="subjectTitle"></h2>
+      <div id="displayBox" style="margin-top:20px;">
+        <h3>Available Notes</h3>
+        <div id="notesList"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentSubject = "";
+
+    function openSubject(subject) {
+      currentSubject = subject;
+      document.getElementById('subjectTitle').textContent = subject + " Notes";
+      document.getElementById('notesSection').style.display = 'block';
+      renderNotes();
+    }
+
+    function renderNotes() {
+      let notes = JSON.parse(localStorage.getItem(currentSubject)) || [];
+      const notesList = document.getElementById('notesList');
+      notesList.innerHTML = "";
+
+      if (notes.length === 0) {
+        notesList.innerHTML = "<p>No notes uploaded yet.</p>";
+        return;
+      }
+
+      notes.forEach(note => {
+        const div = document.createElement('div');
+        div.className = "note-item";
+        div.innerHTML = `<a href="${note.url}" download>${note.name}</a> <span>(${note.date})</span>`;
+        notesList.appendChild(div);
+      });
+      // Fetch notes for a student
+fetch('/api/notes?role=student', {
+  method: 'GET',
+  headers: {
+    'Authorization': `Bearer ${token}`
+  }
+})
+.then(res => res.json())
+.then(data => {
+  // Render notes dynamically
+  displayNotes(data);
+});
+    }
+  </script>
+</body>
+</html>
