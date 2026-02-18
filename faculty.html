@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Faculty Notes Portal</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background: url('https://images.unsplash.com/photo-1524995997946-a1c2e315a42f') no-repeat center center fixed;
+      background-size: cover;
+      color: #fff;
+      transition: background 0.3s, color 0.3s;
+    }
+    .overlay {
+      background: rgba(0,0,0,0.6);
+      min-height: 100vh;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .subjects {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 15px;
+    }
+    .subject-box {
+      background: rgba(255,255,255,0.9);
+      color: #333;
+      padding: 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      width: 120px;
+      text-align: center;
+      transition: transform 0.2s, background 0.3s;
+    }
+    .subject-box:hover {
+      transform: scale(1.05);
+      background: #ff9800;
+      color: #fff;
+    }
+    .notes-section {
+      margin-top: 30px;
+      background: rgba(255,255,255,0.95);
+      color: #333;
+      padding: 20px;
+      border-radius: 8px;
+      display: none;
+    }
+    .notes-section h2 {
+      margin-top: 0;
+    }
+    .note-item {
+      margin: 10px 0;
+    }
+    .note-item a {
+      text-decoration: none;
+      color: #2196f3;
+      font-weight: bold;
+    }
+    .note-item span {
+      font-size: 0.9em;
+      color: #555;
+    }
+    .upload-area {
+      border: 2px dashed #888;
+      padding: 2rem;
+      text-align: center;
+      margin-top: 20px;
+    }
+    .dashboard {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-top: 20px;
+    }
+    .card {
+      border: 1px solid #ccc;
+      padding: 1rem;
+      border-radius: 8px;
+      transition: transform 0.2s;
+      background: #fff;
+      color: #333;
+    }
+    .card:hover {
+      transform: scale(1.05);
+    }
+    .close-btn
+     {
+       display: block;
+       text-align: right;
+       cursor: pointer;
+       font-size: 20px;
+       color: #333;
+    }
+  </style>
+</head>
+<body>
+  <div class="overlay">
+    <h1>📚 Faculty Notes Portal</h1>
+    <p style="text-align:center;">Select a subject to manage notes</p>
+
+    <!-- Subject Boxes -->
+    <div class="subjects">
+      <div class="subject-box" onclick="openSubject('Python')">Python</div>
+      <div class="subject-box" onclick="openSubject('Java')">Java</div>
+      <div class="subject-box" onclick="openSubject('C')">C</div>
+      <div class="subject-box" onclick="openSubject('HTML')">HTML</div>
+      <div class="subject-box" onclick="openSubject('CSS')">CSS</div>
+      <div class="subject-box" onclick="openSubject('JavaScript')">JavaScript</div>
+    </div>
+
+    <!-- Notes Section -->
+    <div class="notes-section" id="notesSection">
+      <h2 id="subjectTitle"></h2>
+      <button onclick="showUpload()">➕ Add New Notes (PDF)</button>
+      <button onclick="showNotes()">📂 Display Uploaded Notes</button>
+
+      <!-- Upload Box -->
+      <div id="uploadBox" style="display:none; margin-top:20px;">
+        <input type="file" id="pdfUpload" accept="application/pdf">
+        <button onclick="uploadPDF()">Upload</button>
+        <!-- Drag-and-Drop Upload -->
+        <div class="upload-area" id="uploadArea">Drag & Drop files here</div>
+      </div>
+
+      <!-- Display Notes -->
+      <div id="displayBox" style="display:none; margin-top:20px;">
+        <h3>Uploaded Notes</h3>
+        <div id="notesList"></div>
+      </div>
+    </div>
+  <script>
+    let currentSubject = "";
+
+    function openSubject(subject) {
+      currentSubject = subject;
+      document.getElementById('subjectTitle').textContent = subject + " Notes";
+      document.getElementById('notesSection').style.display = 'block';
+      document.getElementById('uploadBox').style.display = 'none';
+      document.getElementById('displayBox').style.display = 'none';
+    }
+
+    function showUpload() {
+      document.getElementById('uploadBox').style.display = 'block';
+      document.getElementById('displayBox').style.display = 'none';
+    }
+
+    function showNotes() {
+      document.getElementById('uploadBox').style.display = 'none';
+      document.getElementById('displayBox').style.display = 'block';
+      renderNotes();
+    }
+
+    function uploadPDF() {
+      const fileInput = document.getElementById('pdfUpload');
+      if (fileInput.files.length === 0) {
+        alert("Please select a PDF file!");
+        return;
+      }
+      const file = fileInput.files[0];
+      const date = new Date().toLocaleString();
+      const noteData = { name: file.name, date: date, url: URL.createObjectURL(file) };
+
+      let notes = JSON.parse(localStorage.getItem(currentSubject)) || [];
+      notes.push(noteData);
+      localStorage.setItem(currentSubject, JSON.stringify(notes));
+
+      alert("PDF uploaded successfully!");
+      fileInput.value = "";
+    }
+
+    function renderNotes() {
+      let notes = JSON.parse(localStorage.getItem(currentSubject)) || [];
+      const notesList = document.getElementById('notesList');
+      notesList.innerHTML = "";
+
+      if (notes.length === 0) {
+        notesList.innerHTML = "<p>No notes uploaded yet.</p>";
+        return;
+      }
+
+      notes.forEach(note => {
+        const div = document.createElement('div');
+        div.className = "note-item";
+        div.innerHTML = `<a href="${note.url}" target="_blank">${note.name}</a> <span>(${note.date})</span>`;
+        notesList.appendChild(div);
+      });
+    }
+
+    // Drag-and-Drop Upload
+    const uploadArea = document.getElementById("uploadArea");
+    uploadArea.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      uploadArea.style.background = "#eee";
+    });
+    uploadArea.addEventListener("dragleave", () => {
+      uploadArea.style.background = "";
+    });
+    uploadArea.addEventListener("drop", (e) => {
+      e.preventDefault();
+      const files = e.dataTransfer.files;
+      if (files.length > 0) {
+        const file = files[0];
+        const date = new Date().toLocaleString();
+        const noteData = { name: file.name, date: date, url: URL.createObjectURL(file) };
+
+        let notes = JSON.parse(localStorage.getItem(currentSubject)) || [];
+        notes.push(noteData);
+        localStorage.setItem(currentSubject, JSON.stringify(notes));
+
+        alert(`Uploaded: ${file.name}`);
+      }
+      uploadArea.style.background = "";
+    });
+    function toggleOptions() {
+  document.getElementById("optionsPanel").classList.add("active");
+  document.getElementById("optionsBtn").style.display = "none"; // hide Options button
+}
+
+function closeOptions() {
+  document.getElementById("optionsPanel").classList.remove("active");
+  document.getElementById("optionsBtn").style.display = "block"; // show Options button again
+}
+
+// Load faculty details (example)
+function loadFacultyDetails() {
+  let users = JSON.parse(localStorage.getItem('users')) || [];
+  let faculty = users.find(u => u.userType === "faculty" && u.isLoggedIn);
+
+  const detailsDiv = document.getElementById("facultyDetails");
+  if (faculty) {
+    detailsDiv.innerHTML = `
+      <p><strong>Name:</strong> ${faculty.name}</p>
+      <p><strong>Email:</strong> ${faculty.email}</p>
+      <p><strong>ID:</strong> ${faculty.facultyId}</p>
+    `;
+  } else {
+    detailsDiv.innerHTML = "<p>No faculty details found.</p>";
+  }
+}
+
+// Filter notes
+document.getElementById("filterInput").addEventListener("input", (e) => {
+  const query = e.target.value.toLowerCase();
+  document.querySelectorAll(".note-item").forEach(item => {
+    item.style.display = item.textContent.toLowerCase().includes(query) ? "block" : "none";
+  });
+});
+
+// Sort notes
+function sortNotes() {
+  const sortType = document.getElementById("sortSelect").value;
+  let notes = JSON.parse(localStorage.getItem(currentSubject)) || [];
+
+  if (sortType === "name") {
+    notes.sort((a, b) => a.name.localeCompare(b.name));
+  } else if (sortType === "date") {
+    notes.sort((a, b) => new Date(a.date) - new Date(b.date));
+  }
+
+  localStorage.setItem(currentSubject, JSON.stringify(notes));
+  renderNotes();
+}
+
+window.onload = loadFacultyDetails;
+
+    // Search Filter
+    document.getElementById("search").addEventListener("input", (e) => {
+      const query = e.target.value.toLowerCase();
+      document.querySelectorAll(".note-item").forEach(item => {
+        item.style.display = item.textContent.toLowerCase().includes(query) ? "block" : "none";
+      });
+    });
+  </script>
+</body>
+</html>
